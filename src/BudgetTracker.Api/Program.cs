@@ -1,5 +1,6 @@
 using BudgetTracker.Api.AntiForgery;
 using BudgetTracker.Api.Auth;
+using BudgetTracker.Api.Documents;
 using Microsoft.EntityFrameworkCore;
 using BudgetTracker.Api.Infrastructure;
 
@@ -101,6 +102,9 @@ builder.Services.AddCors(options =>
     });
 });
 
+// Add Document Validation Service
+builder.Services.AddScoped<IDocumentValidator, DocumentValidator>();
+
 var app = builder.Build();
 
 // Apply migrations at startup
@@ -133,9 +137,10 @@ app.UseAntiforgery();
 
 // Map feature endpoints
 app.MapGet("/", () => "API");
-app
-    .MapGroup("/api")
-    .MapAntiForgeryEndpoints()
-    .MapAuthEndpoints();
+
+var apiGroup = app.MapGroup("/api");
+apiGroup.MapAntiForgeryEndpoints();
+apiGroup.MapAuthEndpoints();
+apiGroup.MapDocumentEndpoints();
 
 app.Run();
